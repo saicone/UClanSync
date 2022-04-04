@@ -50,7 +50,7 @@ jar {
 shadowJar {
     archiveBaseName.set('UClanSync-Velocity')
     archiveClassifier.set('')
-    relocate 'com.osiris.dyml', 'com.minelatino.uclansync.libs.dyml'
-    relocate 'org.jetbrains.annotations', 'com.minelatino.uclansync.libs.annotations'
+    relocate 'com.osiris.dyml', 'com.saicone.uclansync.libs.dyml'
+    relocate 'org.jetbrains.annotations', 'com.saicone.uclansync.libs.annotations'
     minimize()
 }
