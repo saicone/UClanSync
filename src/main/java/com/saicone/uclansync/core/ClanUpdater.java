@@ -149,6 +149,9 @@ public class ClanUpdater {
                 if (UClanSync.getClans().getMultiName().equals(args[0])) {
                     Bukkit.getConsoleSender().sendMessage("Pong from: " + args[1]);
                 }
+                return;
+            default:
+                Locale.log(2, "Unknown action ID received from messenger: " + id);
         }
     }
 

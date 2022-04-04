@@ -53,10 +53,6 @@ public class SettingsFile extends YamlConfiguration {
         saveResource(addon, path, replace);
     }
 
-    public File getFile(String path) {
-        return getFile(addon.getAddonDataFolder(), path);
-    }
-
     public static void saveResource(Addon addon, String path, boolean replace) {
         InputStream input = addon.getClass().getClassLoader().getResourceAsStream(path);
         if (input != null) {
@@ -73,6 +69,10 @@ public class SettingsFile extends YamlConfiguration {
                 e.printStackTrace();
             }
         }
+    }
+
+    public File getFile(String path) {
+        return getFile(addon.getAddonDataFolder(), path);
     }
 
     public static File getFile(File folder, String path) {

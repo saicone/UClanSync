@@ -46,10 +46,6 @@ public class SettingsFile {
         saveResource(plugin, path, replace);
     }
 
-    public File getFile(String path) {
-        return getFile(plugin.getDataFolder(), path);
-    }
-
     public static void saveResource(Plugin plugin, String path, boolean replace) {
         InputStream input = plugin.getClass().getClassLoader().getResourceAsStream(path);
         if (input != null) {
@@ -66,6 +62,10 @@ public class SettingsFile {
                 e.printStackTrace();
             }
         }
+    }
+
+    public File getFile(String path) {
+        return getFile(plugin.getDataFolder(), path);
     }
 
     public static File getFile(File folder, String path) {
