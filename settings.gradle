@@ -1,0 +1,9 @@
+rootProject.name = 'UClanSync'
+
+include(
+        'bridge:bungee',
+        'bridge:velocity',
+        'messenger:rabbitmq',
+        'messenger:redis',
+        'jar'
+)

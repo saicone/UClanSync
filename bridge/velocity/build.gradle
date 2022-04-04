@@ -1,0 +1,56 @@
+plugins {
+    id 'net.kyori.blossom' version '1.3.0'
+    id 'com.github.johnrengelman.shadow'
+}
+
+blossom {
+    replaceTokenIn('src/main/java/com/minelatino/uclansync/UClanSync.java')
+    replaceToken '${version}', project.version
+}
+
+repositories {
+    maven { url 'https://repo.velocitypowered.com/releases/' }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly ('com.velocitypowered:velocity-api:3.0.0') {
+        exclude group: 'com.google.code.gson', module: 'gson'
+        exclude group: 'com.google.code.guava', module: 'guava'
+        exclude group: 'com.moandjiezana.toml', module: 'toml4j'
+        exclude group: 'com.velocitypowered', module: 'velocity-brigadier'
+        exclude group: 'net.kyori', module: 'adventure-text-serializer-gson'
+        exclude group: 'net.kyori', module: 'adventure-text-serializer-legacy'
+        exclude group: 'net.kyori', module: 'adventure-text-serializer-plain'
+        exclude group: 'org.checkerframework', module: 'checker-qual'
+        exclude group: 'org.spongepowered', module: 'configurate-gson'
+        exclude group: 'org.spongepowered', module: 'configurate-hocon'
+        exclude group: 'org.spongepowered', module: 'configurate-yaml'
+
+        // Guava
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'com.google.guava', module: 'failureaccess'
+        exclude group: 'com.google.guava', module: 'listenablefuture'
+        exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
+
+        // Guice
+        exclude group: 'aopalliance', module: 'aopalliance'
+        exclude group: 'javax.inject', module: 'javax.inject'
+    }
+    implementation 'com.github.Osiris-Team:Dyml:9.4.0'
+}
+
+jar {
+    enabled = false
+    baseName 'UClanSync-Velocity'
+    dependsOn (shadowJar)
+}
+
+shadowJar {
+    archiveBaseName.set('UClanSync-Velocity')
+    archiveClassifier.set('')
+    relocate 'com.osiris.dyml', 'com.minelatino.uclansync.libs.dyml'
+    relocate 'org.jetbrains.annotations', 'com.minelatino.uclansync.libs.annotations'
+    minimize()
+}

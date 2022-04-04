@@ -1,0 +1,45 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    repositories {
+        maven {
+            url 'http://ptms.ink:8081/repository/releases/'
+            allowInsecureProtocol true
+        }
+        mavenCentral()
+    }
+
+    dependencies {
+        compileOnly 'org.jetbrains:annotations:23.0.0'
+    }
+
+    compileJava {
+        options.release = 8
+        options.encoding = 'UTF-8'
+    }
+}
+
+processResources {
+    filesMatching('plugin.properties') {
+        expand(project.properties)
+    }
+}
+
+dependencies {
+    compileOnly 'ink.ptms.core:v11802:11802:universal'
+    compileOnly 'ink.ptms.core:v11701:11701:universal'
+
+    compileOnly fileTree(dir: 'libs', includes: ['*.jar'])
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,4 @@
+name: UClanSync
+main: com.saicone.uclansync.UClanSync
+version: ${version}
+author: Rubenicos

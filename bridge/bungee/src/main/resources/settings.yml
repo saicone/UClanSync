@@ -1,0 +1,15 @@
+# Main configuration
+Messenger:
+  # Messaging channel, servers who you want to synchronize clan changes
+  # must have the same channel ID
+  Channel: 'survival:clansync'
+
+# Command configuration
+Command:
+  # Command name
+  name: 'uclansyncbungee'
+  # Command permission
+  permission: 'uclansync.use'
+  # Command aliases
+  aliases:
+    - 'usyncbungee'

@@ -1,0 +1,22 @@
+plugins {
+    id 'com.github.johnrengelman.shadow'
+}
+
+dependencies {
+    compileOnly rootProject
+
+    compileOnly 'ink.ptms.core:v11802:11802:universal'
+    compileOnly 'ink.ptms.core:v11701:11701:universal'
+
+    compileOnly ('com.rabbitmq:amqp-client:5.14.2') {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+}
+
+jar {
+    dependsOn (shadowJar)
+}
+
+shadowJar {
+    archiveFileName = 'rabbitmq-messenger.compiled'
+}

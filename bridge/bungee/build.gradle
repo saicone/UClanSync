@@ -1,0 +1,21 @@
+processResources {
+    filesMatching('bungee.yml') {
+        expand(project.properties)
+    }
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+
+dependencies {
+    compileOnly ('net.md-5:bungeecord-api:1.18-R0.1-SNAPSHOT') {
+        exclude group: 'net.md-5', module: 'bungeecord-protocol'
+        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'io.netty', module: 'netty-transport-native-unix-common'
+    }
+}
+
+jar {
+    baseName 'UClanSync-Bungee'
+}

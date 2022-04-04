@@ -1,0 +1,83 @@
+# Current server configuration
+Server:
+  # Each server must have the SAME NAME has proxy configuration to make
+  # clan homes work properly across servers
+  Name: 'MySurvival1'
+
+# Addon configuration
+Addon:
+  # Logging level to see messages in console, set 0 to disable all logs
+  # 1 = errors
+  # 2 = errors, warnings
+  # 3 = errors, warnings, info
+  # 4 = errors, warnings, info, debug information
+  LogLevel: 3
+  # Addon feature list to enable or disable
+  Feature:
+    # Clan homes sync
+    Homes: true
+    # Clan chat sync
+    Chat: true
+
+# Messenger configuration
+Messenger:
+  # Messaging channel, servers who you want to synchronize clan changes
+  # must have the same channel ID
+  Channel: 'survival:uclansync'
+  # PROXY, PLUGIN, REDIS, RABBITMQ
+  # Available messenger types:
+  # - PROXY    = Don't require any type of installation, but your servers
+  #              must be in the same proxy (Bungee or Velocity).
+  # - PLUGIN   = Same has PROXY but require to put UClanSync plugin in
+  #              your proxy instance (And is more faster than PROXY type).
+  # - REDIS    = Use a Redis server for messaging (Configure it below).
+  # - RABBITMQ = Use a RabbitMQ server for messaging (Configure it below).
+  Type: 'PROXY'
+  # Redis configuration
+  Redis:
+    # Redis url connection
+    #
+    # URL: redis://[user]:[password@]host[:port][/databaseNumber]
+    url: 'redis://:password@localhost:6379/0'
+  # RabbitMQ configuration
+  RabbitMQ:
+    exchange: 'uclansync'
+    # RabbitMQ url connection
+    # Documentation: https://www.rabbitmq.com/uri-spec.html
+    #
+    # URL: amqp://userName:password@hostName:portNumber/virtualHost
+    url: 'amqp://user:password@localhost:5672//'
+
+# Addon command configuration
+Command:
+  Name: 'uclansync'
+  Permission: 'uclansync.use'
+  Aliases:
+    - 'clansync'
+
+# Needed libraries for some systems in UClanSync
+Libraries:
+  # Redis library
+  Redis:
+    # Class to check if library is present in class path
+    # Set to "false" if you want to download the library anyway
+    check: 'redis.clients.jedis.JedisPubSub'
+    # Library dependency path (just like Gradle)
+    path: 'redis.clients:jedis:4.2.0'
+    # Required libraries to work
+    require:
+      - check: 'com.google.gson.Gson'
+        path: 'com.google.gson:gson:2.8.9'
+      - check: 'org.apache.commons.pool2.ObjectPool'
+        path: 'org.apache.commons:commons-pool2:2.11.1'
+      - check: 'org.json.JSONObject'
+        path: 'org.json:json:20211205'
+      - check: 'org.slf4j.Logger'
+        path: 'org.slf4j:slf4j-api:1.7.32'
+  # RabbitMQ library
+  RabbitMQ:
+    check: 'com.rabbitmq.client.DeliverCallback'
+    path: 'com.rabbitmq:amqp-client:5.14.2'
+    require:
+      - check: 'org.slf4j.Logger'
+        path: 'org.slf4j:slf4j-api:1.7.32'
