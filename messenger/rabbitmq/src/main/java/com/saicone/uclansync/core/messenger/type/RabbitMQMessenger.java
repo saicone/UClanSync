@@ -60,7 +60,9 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
         try {
             connection = factory.newConnection();
         } catch (Throwable t) {
+            cChannel = null;
             t.printStackTrace();
+            return;
         }
         newChannel();
     }
@@ -75,10 +77,11 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
                 cChannel.queueBind(queue, exchange, getChannel());
                 cChannel.basicConsume(queue, true, this, __ -> {});
                 enabled = true;
-                alive();
             } catch (Throwable t) {
                 t.printStackTrace();
+                return;
             }
+            alive();
         }).start();
     }
 
@@ -159,12 +162,15 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
                     Thread.currentThread().interrupt();
                 }
             } else {
-                Locale.log(2, "RabbitMQ connection dropped, automatic reconnection in 8 seconds...");
+                Locale.log(2, "RabbitMQ connection dropped, automatic reconnection every 8 seconds...");
                 onDisable();
 
                 newConnection(url);
 
-                if (!enabled) {
+                if (enabled) {
+                    Locale.log(3, "RabbitMQ connection is alive again");
+                    break;
+                } else {
                     enabled = true;
                     try {
                         Thread.sleep(8000);

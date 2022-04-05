@@ -9,15 +9,15 @@ import me.ulrich.clans.events.ClanAddonEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClanUpdater {
 
     private Messenger messenger = null;
 
+    private final List<UUID> toUpdate = new ArrayList<>();
     private final Map<String, Location> locations = new HashMap<>();
     private String type = "PROXY";
 
@@ -61,8 +61,12 @@ public class ClanUpdater {
         sendMessage("INVITEPLAYER", player, clan, String.valueOf(expires));
     }
 
-    public void updateClan(String name) {
-        sendMessage("UPDATECLAN", name);
+    public void updateClan(String id) {
+        updateClan(id, false);
+    }
+
+    public void updateClan(String id, boolean newClan) {
+        sendMessage("UPDATECLAN", id, String.valueOf(newClan));
     }
 
     public void updateChest(String clan) {
@@ -130,7 +134,7 @@ public class ClanUpdater {
                 processInvitePlayer(UUID.fromString(args[0]), UUID.fromString(args[1]), Long.parseLong(args[2]));
                 return;
             case "UPDATECLAN":
-                processUpdateClan(UUID.fromString(args[0]));
+                processUpdateClan(UUID.fromString(args[0]), args[1].equalsIgnoreCase("true"));
                 return;
             case "UPDATECHEST":
                 processUpdateChest(UUID.fromString(args[0]));
@@ -172,11 +176,28 @@ public class ClanUpdater {
         }
     }
 
-    private void processUpdateClan(UUID clanID) {
+    private void processUpdateClan(UUID clanID, boolean newClan) {
+        if (toUpdate.contains(clanID)) {
+            return;
+        }
+        toUpdate.add(clanID);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(UClanSync.getClans(), () -> {
+            toUpdate.remove(clanID);
+            // Avoid bugs about clan creation
+            if (newClan) {
+                UClanSync.getClans().getClanAPI().reloadClanData(clanID);
+                processUpdateMembers(clanID);
+            } else {
+                processUpdateMembers(clanID);
+                UClanSync.getClans().getClanAPI().reloadClanData(clanID);
+            }
+        }, UClanSync.SETTINGS.getInt("Addon.ClanUpdater.Update-Delay", 40));
+    }
+
+    private void processUpdateMembers(UUID clanID) {
         if (UClanSync.getClans().getClanAPI().clanExists(clanID)) {
             ClanData clan = UClanSync.getClans().getClanAPI().getClan(clanID);
             clan.getMembers().iterator().forEachRemaining((player) -> UClanSync.getClans().getPlayerAPI().loadPlayerData(player));
-            UClanSync.getClans().getClanAPI().reloadClanData(clanID);
         }
     }
 
@@ -189,7 +210,7 @@ public class ClanUpdater {
         Bukkit.getScheduler().runTask(UClanSync.getClans(), () -> Bukkit.getPluginManager().callEvent(event));
     }
 
-    private void processTeleport(String player, String server, String location) {
+    private void processTeleport(String playerID, String server, String location) {
         if (!UClanSync.SETTINGS.getBoolean("Addon.Feature.Homes", true)) {
             return;
         }
@@ -203,8 +224,14 @@ public class ClanUpdater {
                 float yaw = Float.parseFloat(split[4]);
                 float pitch = Float.parseFloat(split[5]);
                 Location loc = new Location(world, x, y, z, yaw, pitch);
-                locations.put(player, loc);
-                Bukkit.getScheduler().runTaskLaterAsynchronously(UClanSync.getClans(), () -> locations.remove(player), 200L);
+                Player player = Bukkit.getPlayer(UUID.fromString(playerID));
+                if (player != null && player.isOnline()) {
+                    player.teleport(loc);
+                } else {
+                    locations.put(playerID, loc);
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(UClanSync.getClans(), () -> locations.remove(playerID),
+                            UClanSync.SETTINGS.getInt("Addon.ClanUpdater.Teleport-Cache", 200));
+                }
             }
         }
     }

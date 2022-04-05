@@ -30,7 +30,6 @@ public class BukkitListener implements Listener {
                 new UpdateExecutor<ClanRivalRemoveEvent>(ClanRivalRemoveEvent.getHandlerList(), (event) -> event.getClan2().toString()),
                 new UpdateExecutor<ClanRivalAddEvent>(ClanRivalAddEvent.getHandlerList(), (event) -> event.getClan2().toString()),
                 new UpdateExecutor<ClanDeleteEvent>(ClanDeleteEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanCreateEvent>(ClanCreateEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanModTagEvent>(ClanModTagEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanModDescEvent>(ClanModDescEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanPlayerRoleChangeEvent>(ClanPlayerRoleChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
@@ -76,6 +75,11 @@ public class BukkitListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInvited(ClanPlayerInvitedEvent e) {
         UClanSync.get().getClanUpdater().invitePlayer(e.getPlayer().toString(), e.getClanID().toString(), e.getExpires());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onClanCreate(ClanCreateEvent e) {
+        UClanSync.get().getClanUpdater().updateClan(e.getClanID().toString(), true);
     }
 
     @EventHandler(ignoreCancelled = true)

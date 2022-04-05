@@ -55,12 +55,12 @@ public class UClanSync extends Addon {
                     getMessengers("rabbitmq", "redis"),
                     getClassLoader());
             if (libraryLoader.load(SETTINGS.getConfigurationSection("Libraries.Redis"))) {
-                libraryLoader.init("com.minelatino.uclansync.core.messenger.type.RedisMessenger");
+                libraryLoader.init("com.saicone.uclansync.core.messenger.type.RedisMessenger");
             } else {
                 Locale.log(2, "Redis messenger will not be loaded");
             }
             if (libraryLoader.load(SETTINGS.getConfigurationSection("Libraries.RabbitMQ"))) {
-                libraryLoader.init("com.minelatino.uclansync.core.messenger.type.RabbitMQMessenger");
+                libraryLoader.init("com.saicone.uclansync.core.messenger.type.RabbitMQMessenger");
             } else {
                 Locale.log(2, "RabbitMQ messenger will not be loaded");
             }
@@ -134,6 +134,7 @@ public class UClanSync extends Addon {
     private URL getMessenger(String name) {
         URL url = getClassLoader().getResource(name + "-messenger.compiled");
         if (url == null) {
+            Bukkit.getConsoleSender().sendMessage("[UClanSync] The " + name + " addon was not found inside .jar");
             return null;
         }
 

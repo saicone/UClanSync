@@ -12,6 +12,14 @@ Addon:
   # 3 = errors, warnings, info
   # 4 = errors, warnings, info, debug information
   LogLevel: 3
+  # Clan updater configuration
+  ClanUpdater:
+    # Delay in ticks to process a clan update (To avoid multiple updates at the same time)
+    # 20 ticks = 1 second
+    Update-Delay: 40
+    # Time in ticks to save an teleport request
+    # 20 ticks = 1 second
+    Teleport-Cache: 200
   # Addon feature list to enable or disable
   Feature:
     # Clan homes sync
@@ -46,7 +54,8 @@ Messenger:
     # Documentation: https://www.rabbitmq.com/uri-spec.html
     #
     # URL: amqp://userName:password@hostName:portNumber/virtualHost
-    url: 'amqp://user:password@localhost:5672//'
+    # Is the virtual host is "/", set has "%2F"
+    url: 'amqp://guest:guest@localhost:5672/%2F'
 
 # Addon command configuration
 Command:
