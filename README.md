@@ -3,13 +3,13 @@
 <h4 align="center">Synchronize your Ultimate Clans data across servers.</h4>
 
 <p align="center">
-    <a href="https://www.codefactor.io/repository/github/saicone/rtag">
+    <a href="https://www.codefactor.io/repository/github/saicone/UClanSync">
         <img src="https://www.codefactor.io/repository/github/saicone/UClanSync/badge?style=flat-square"/>
     </a>
-    <a href="https://github.com/saicone/rtag">
+    <a href="https://github.com/saicone/UClanSync">
         <img src="https://img.shields.io/github/languages/code-size/saicone/UClanSync?style=flat-square"/>
     </a>
-    <a href="https://github.com/saicone/rtag">
+    <a href="https://github.com/saicone/UClanSync">
         <img src="https://img.shields.io/tokei/lines/github/saicone/UClanSync?style=flat-square"/>
     </a>
 </p>
