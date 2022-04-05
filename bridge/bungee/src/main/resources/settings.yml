@@ -1,8 +1,10 @@
 # Main configuration
 Messenger:
-  # Messaging channel, servers who you want to synchronize clan changes
-  # must have the same channel ID
-  Channel: 'survival:clansync'
+  # Allowed messaging channels to forward to other servers
+  # Servers who you want to synchronize clan changes must have the same channel ID
+  Channels:
+    - 'survival:clansync'
+    - 'sync:otherserver'
 
 # Command configuration
 Command:

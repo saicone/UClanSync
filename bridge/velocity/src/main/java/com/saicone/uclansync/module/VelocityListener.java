@@ -8,38 +8,56 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class VelocityListener {
 
     private final UClanSync plugin;
-    private LegacyChannelIdentifier channel;
+    private Map<String, LegacyChannelIdentifier> channels;
 
     public VelocityListener(UClanSync plugin) {
         this.plugin = plugin;
-        channel = new LegacyChannelIdentifier(UClanSync.getSettings().getString("Messenger.Channel", "uclansync:channel"));
+        channels = loadChannels();
+    }
+
+    private Map<String, LegacyChannelIdentifier> loadChannels() {
+        Map<String, LegacyChannelIdentifier> channels = new HashMap<>();
+        for (String channel : UClanSync.getSettings().getStringList("Messenger.Channels")) {
+            channels.put(channel, new LegacyChannelIdentifier(channel));
+        }
+        return channels;
     }
 
     public void onEnable() {
-        plugin.getProxy().getChannelRegistrar().register(channel);
+        channels.forEach((id, channel) -> plugin.getProxy().getChannelRegistrar().register(channel));
         plugin.getProxy().getEventManager().register(plugin, this);
     }
 
     public void onDisable() {
-        plugin.getProxy().getChannelRegistrar().unregister(channel);
+        channels.forEach((id, channel) -> plugin.getProxy().getChannelRegistrar().unregister(channel));
         plugin.getProxy().getEventManager().unregisterListener(plugin, this);
     }
 
     public void onReload() {
-        String channel = UClanSync.getSettings().getString("Messenger.Channel", "uclansync:channel");
-        if (!this.channel.getId().equals(channel)) {
-            plugin.getProxy().getChannelRegistrar().unregister(this.channel);
-            this.channel = new LegacyChannelIdentifier(channel);
-            plugin.getProxy().getChannelRegistrar().register(this.channel);
-        }
+        Map<String, LegacyChannelIdentifier> channels = loadChannels();
+        this.channels.forEach((id, channel) -> {
+            if (!channels.containsKey(id)) {
+                plugin.getProxy().getChannelRegistrar().unregister(channel);
+            }
+        });
+
+        channels.forEach((id, channel) -> {
+            if (!this.channels.containsKey(id)) {
+                plugin.getProxy().getChannelRegistrar().register(channel);
+            }
+        });
+        this.channels = channels;
     }
 
     @Subscribe
     public void onMessage(PluginMessageEvent e) {
-        if (!e.getIdentifier().getId().equals(channel.getId())) {
+        if (!channels.containsKey(e.getIdentifier().getId())) {
             return;
         }
 
@@ -53,7 +71,7 @@ public class VelocityListener {
         byte[] data = e.getData();
         plugin.getProxy().getScheduler().buildTask(plugin, () -> plugin.getProxy().getAllServers().forEach(server -> {
             if (!server.getServerInfo().equals(info)) {
-                server.sendPluginMessage(channel, data);
+                server.sendPluginMessage(e.getIdentifier(), data);
             }
         })).schedule();
     }
