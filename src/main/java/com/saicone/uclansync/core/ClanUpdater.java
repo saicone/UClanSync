@@ -187,11 +187,13 @@ public class ClanUpdater {
     }
 
     private void processInviteClan(UUID sender, UUID receiver, boolean ally) {
-        if (ally) {
-            UClanSync.getClans().getClanAPI().allySend(sender, receiver, false);
-        } else {
-            UClanSync.getClans().getClanAPI().rivalRemoveSend(sender, receiver, false);
-        }
+        Bukkit.getScheduler().runTask(UClanSync.getClans(), () -> {
+            if (ally) {
+                UClanSync.getClans().getClanAPI().allySend(sender, receiver, false);
+            } else {
+                UClanSync.getClans().getClanAPI().rivalRemoveSend(sender, receiver, false);
+            }
+        });
     }
 
     private void processInvitePlayer(UUID player, UUID clanID, long expires) {
