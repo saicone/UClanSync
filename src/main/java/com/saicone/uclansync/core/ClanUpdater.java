@@ -91,11 +91,10 @@ public class ClanUpdater {
     public void players() {
         StringBuilder builder = new StringBuilder();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            builder.append(player.getName()).append(",").append(player.getUniqueId()).append(";");
+            builder.append(";").append(player.getName()).append(",").append(player.getUniqueId());
         }
         if (builder.length() > 0) {
-            builder.deleteCharAt(builder.length() - 1);
-            sendMessage("PLAYERS", builder.toString());
+            sendMessage("PLAYERS", builder.substring(1));
         }
     }
 
@@ -199,7 +198,8 @@ public class ClanUpdater {
         if (Bukkit.getPlayer(player) != null) {
             if (UClanSync.getClans().getClanAPI().clanExists(clanID)) {
                 ClanData clan = UClanSync.getClans().getClanAPI().getClan(clanID);
-                UClanSync.getClans().getPlayerAPI().inviteToClan(clan.getLeader(), player);
+                // Invite can't be async
+                Bukkit.getScheduler().runTask(UClanSync.getClans(), () -> UClanSync.getClans().getPlayerAPI().inviteToClan(clan.getLeader(), player));
             }
         }
     }
