@@ -10,6 +10,7 @@ import com.saicone.uclansync.module.listener.BukkitListener;
 import com.saicone.uclansync.util.Proxy;
 import me.ulrich.clans.Clans;
 import me.ulrich.clans.data.Addon;
+import me.ulrich.clans.data.ClanEnum;
 import org.bukkit.Bukkit;
 
 import java.io.File;
@@ -81,6 +82,8 @@ public class UClanSync extends Addon {
         Bukkit.getConsoleSender().sendMessage("[UClanSync] Enabling UClanSync addon...");
         getClans().setMultiServer(true);
         getClans().setMultiName(SETTINGS.getString("Server.Name", "null"));
+        getClans().setMultiMode(ClanEnum.MultiserverMode.BUNGEECORD);
+        getClans().getClanAPI().setProxieds("{}");
         Proxy.init();
         clanUpdater = new ClanUpdater();
         clanUpdater.onEnable();

@@ -16,10 +16,15 @@ import java.util.*;
 public class ClanUpdater {
 
     private Messenger messenger = null;
+    private final PlayerUpdateTask playerUpdate;
 
     private final List<UUID> toUpdate = new ArrayList<>();
     private final Map<String, Location> locations = new HashMap<>();
     private String type = "PROXY";
+
+    public ClanUpdater() {
+        playerUpdate = new PlayerUpdateTask(this);
+    }
 
     private void newMessenger(String type) {
         this.type = type;
@@ -31,6 +36,7 @@ public class ClanUpdater {
 
     public void onEnable() {
         newMessenger(UClanSync.SETTINGS.getString("Messenger.Type", "PROXY"));
+        playerUpdate.start();
     }
 
     public void onDisable() {
@@ -38,6 +44,7 @@ public class ClanUpdater {
             messenger.onDisable();
             messenger = null;
         }
+        playerUpdate.stop();
     }
 
     public void onReload() {
@@ -79,6 +86,17 @@ public class ClanUpdater {
 
     public void chat(String player, String clan, String message) {
         sendMessage("CHAT", player, clan, message);
+    }
+
+    public void players() {
+        StringBuilder builder = new StringBuilder();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            builder.append(player.getName()).append(",").append(player.getUniqueId()).append(";");
+        }
+        if (builder.length() > 0) {
+            builder.deleteCharAt(builder.length() - 1);
+            sendMessage("PLAYERS", builder.toString());
+        }
     }
 
     public void ping() {
@@ -144,6 +162,16 @@ public class ClanUpdater {
                 return;
             case "CHAT":
                 processChat(UUID.fromString(args[0]), UUID.fromString(args[1]), args[2]);
+                return;
+            case "PLAYERS":
+                // Avoid blank array
+                if (args[0].contains(";")) {
+                    for (String s : args[0].split(";")) {
+                        playerUpdate.append(s);
+                    }
+                } else {
+                    playerUpdate.append(args[0]);
+                }
                 return;
             case "PING":
                 Bukkit.getConsoleSender().sendMessage("Ping from: " + args[0]);

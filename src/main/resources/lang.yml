@@ -3,6 +3,7 @@ Command:
   Help:
     - '&f&lUClan&1&lSync&f >'
     - '&9/{0} reload &7- &fReload UClanSync'
+    - '&9/{0} players &7- &fSee all online players in synchronized servers'
     - '&9/{0} ping &7- &fSend a ping to other servers'
     - '&9/{0} help &7- &fShow this information'
   Reload: '&f&lUClan&1&lSync &8> &aUClanSync reloaded successfully! [&f{0} ms&a]'

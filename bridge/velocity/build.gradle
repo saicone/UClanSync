@@ -4,7 +4,7 @@ plugins {
 }
 
 blossom {
-    replaceTokenIn('src/main/java/com/minelatino/uclansync/UClanSync.java')
+    replaceTokenIn('src/main/java/com/saicone/uclansync/UClanSync.java')
     replaceToken '${version}', project.version
 }
 

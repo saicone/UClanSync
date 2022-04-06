@@ -1,5 +1,8 @@
 package com.saicone.uclansync.module.command;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.saicone.uclansync.UClanSync;
 import com.saicone.uclansync.module.Locale;
 import org.bukkit.Location;
@@ -10,10 +13,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MainCommand extends Command {
 
-    private static final List<String> TAB = Arrays.asList("help", "ping", "reload");
+    private static final List<String> TAB = Arrays.asList("help", "ping", "players", "reload");
 
     MainCommand() {
         super("uclansync");
@@ -26,6 +30,20 @@ public class MainCommand extends Command {
                 long time = System.currentTimeMillis();
                 UClanSync.get().onReload();
                 Locale.sendTo(sender, "Command.Reload", (System.currentTimeMillis() - time));
+                return true;
+            } else if (args[0].equalsIgnoreCase("players")) {
+                JsonObject json = new Gson().fromJson(UClanSync.getClans().getClanAPI().getProxieds(), JsonObject.class);
+                if (json.entrySet().size() < 1) {
+                    sender.sendMessage("There's no online players");
+                } else {
+                    String[] names = new String[json.entrySet().size()];
+                    int i = 0;
+                    for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+                        names[i] = entry.getKey();
+                        i++;
+                    }
+                    sender.sendMessage("Player List:", String.join(", ", names));
+                }
                 return true;
             } else if (args[0].equalsIgnoreCase("ping")) {
                 UClanSync.get().getClanUpdater().ping();

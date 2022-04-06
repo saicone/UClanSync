@@ -20,6 +20,9 @@ Addon:
     # Time in ticks to save an teleport request
     # 20 ticks = 1 second
     Teleport-Cache: 200
+    # Time in ticks to tell other servers the players that are connected on current server
+    # 20 ticks = 1 seconds
+    Player-Update: 80
   # Addon feature list to enable or disable
   Feature:
     # Clan homes sync
@@ -32,7 +35,6 @@ Messenger:
   # Messaging channel, servers who you want to synchronize clan changes
   # must have the same channel ID
   Channel: 'survival:uclansync'
-  # PROXY, PLUGIN, REDIS, RABBITMQ
   # Available messenger types:
   # - PROXY    = Don't require any type of installation, but your servers
   #              must be in the same proxy (Bungee or Velocity).
