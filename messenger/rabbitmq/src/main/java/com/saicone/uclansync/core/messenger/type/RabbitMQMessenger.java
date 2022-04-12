@@ -23,6 +23,7 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
     private Channel cChannel = null;
     private boolean enabled = false;
 
+    private boolean reconnected = false;
     private String url = "";
 
     public RabbitMQMessenger(Consumer<String> consumer) {
@@ -76,6 +77,9 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
                 cChannel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, false, true, null);
                 cChannel.queueBind(queue, exchange, getChannel());
                 cChannel.basicConsume(queue, true, this, __ -> {});
+                if (reconnected) {
+                    Locale.log(3, "RabbitMQ connection is alive again");
+                }
                 enabled = true;
             } catch (Throwable t) {
                 t.printStackTrace();
@@ -93,6 +97,7 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
     @Override
     public void onDisable() {
         enabled = false;
+        reconnected = false;
         close(cChannel, connection);
         cChannel = null;
         connection = null;
@@ -116,6 +121,7 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
             } else {
                 if (!getChannel().equals(channel) || !this.exchange.equals(exchange)) {
                     enabled = false;
+                    reconnected = false;
                     close(cChannel);
                     setChannel(channel);
                     this.exchange = exchange;
@@ -165,12 +171,10 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
                 Locale.log(2, "RabbitMQ connection dropped, automatic reconnection every 8 seconds...");
                 onDisable();
 
+                reconnected = true;
                 newConnection(url);
 
-                if (enabled) {
-                    Locale.log(3, "RabbitMQ connection is alive again");
-                    break;
-                } else {
+                if (!enabled) {
                     enabled = true;
                     try {
                         Thread.sleep(8000);
