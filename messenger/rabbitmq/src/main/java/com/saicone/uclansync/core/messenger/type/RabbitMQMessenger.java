@@ -79,6 +79,7 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
                 cChannel.basicConsume(queue, true, this, __ -> {});
                 if (reconnected) {
                     Locale.log(3, "RabbitMQ connection is alive again");
+                    reconnected = false;
                 }
                 enabled = true;
             } catch (Throwable t) {
@@ -97,7 +98,6 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
     @Override
     public void onDisable() {
         enabled = false;
-        reconnected = false;
         close(cChannel, connection);
         cChannel = null;
         connection = null;
@@ -121,7 +121,6 @@ public class RabbitMQMessenger extends Messenger implements DeliverCallback {
             } else {
                 if (!getChannel().equals(channel) || !this.exchange.equals(exchange)) {
                     enabled = false;
-                    reconnected = false;
                     close(cChannel);
                     setChannel(channel);
                     this.exchange = exchange;

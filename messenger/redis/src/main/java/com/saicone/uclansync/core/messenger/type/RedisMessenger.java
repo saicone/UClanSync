@@ -46,14 +46,12 @@ public class RedisMessenger extends Messenger {
         register();
     }
 
+    @SuppressWarnings("all")
     private void register() {
         enabled = true;
-        new Thread(() -> {
-            try (Jedis jedis = pool.getResource()) {
-                jedis.subscribe(bridge, getChannel());
-                bridge.alive();
-            }
-        }).start();
+        // Create separated thread because jedis can block the current one
+        // This can be done with Bukkit async runnable
+        new Thread(() -> alive()).start();
     }
 
     @Override
@@ -111,32 +109,37 @@ public class RedisMessenger extends Messenger {
         }
     }
 
-    private class Bridge extends JedisPubSub {
-
-        @SuppressWarnings("all")
-        public void alive() {
-            while (enabled && !Thread.interrupted() && pool != null && !pool.isClosed()) {
-                try (Jedis jedis = pool.getResource()) {
+    @SuppressWarnings("all")
+    private void alive() {
+        boolean reconnected = false;
+        while (enabled && !Thread.interrupted() && pool != null && !pool.isClosed()) {
+            try (Jedis jedis = pool.getResource()) {
+                if (reconnected) {
                     Locale.log(3, "Redis connection is alive again");
-                    jedis.subscribe(this, getChannel());
-                } catch (Throwable t) {
-                    if (enabled) {
-                        Locale.log(2, "Redis connection dropped, automatic reconnection in 8 seconds...", t.getMessage());
-                        try {
-                            unsubscribe();
-                        } catch (Throwable ignored) { }
+                }
+                jedis.subscribe(bridge, getChannel());
+            } catch (Throwable t) {
+                if (enabled) {
+                    Locale.log(2, "Redis connection dropped, automatic reconnection in 8 seconds...", t.getMessage());
+                    try {
+                        bridge.unsubscribe();
+                    } catch (Throwable ignored) { }
 
-                        try {
-                            Thread.sleep(8000);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    } else {
-                        return;
+                    reconnected = true;
+
+                    try {
+                        Thread.sleep(8000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
+                } else {
+                    return;
                 }
             }
         }
+    }
+
+    private class Bridge extends JedisPubSub {
 
         @Override
         public void onMessage(String channel, String message) {
