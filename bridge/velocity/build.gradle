@@ -38,7 +38,8 @@ dependencies {
         exclude group: 'aopalliance', module: 'aopalliance'
         exclude group: 'javax.inject', module: 'javax.inject'
     }
-    implementation 'com.github.Osiris-Team:Dyml:9.4.0'
+    implementation 'com.saicone.ezlib:ezlib:1.1'
+    compileOnly 'com.github.Osiris-Team:Dyml:9.4.0'
 }
 
 jar {
@@ -50,7 +51,6 @@ jar {
 shadowJar {
     archiveBaseName.set('UClanSync-Velocity')
     archiveClassifier.set('')
-    relocate 'com.osiris.dyml', 'com.saicone.uclansync.libs.dyml'
-    relocate 'org.jetbrains.annotations', 'com.saicone.uclansync.libs.annotations'
-    minimize()
+    relocate 'com.saicone.ezlib', project.group + '.lib.ezlib'
+    relocate 'com.osiris.dyml', project.group + '.lib.dyml'
 }

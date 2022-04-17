@@ -13,10 +13,6 @@ import java.util.function.Consumer;
 
 public class RabbitMQMessenger extends Messenger implements DeliverCallback {
 
-    static {
-        Messenger.PROVIDERS.put("rabbitmq", RabbitMQMessenger.class);
-    }
-
     private String exchange = UClanSync.SETTINGS.getString("Messenger.RabbitMQ.exchange", "uclansync");
     private ConnectionFactory factory = null;
     private Connection connection = null;

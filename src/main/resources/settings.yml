@@ -39,7 +39,7 @@ Messenger:
   # - PROXY    = Don't require any type of installation, but your servers
   #              must be in the same proxy (Bungee or Velocity).
   # - PLUGIN   = Same has PROXY but require to put UClanSync plugin in
-  #              your proxy instance (And is more faster than PROXY type).
+  #              your proxy instance (And is faster than PROXY type).
   # - REDIS    = Use a Redis server for messaging (Configure it below).
   # - RABBITMQ = Use a RabbitMQ server for messaging (Configure it below).
   Type: 'PROXY'
@@ -56,7 +56,7 @@ Messenger:
     # Documentation: https://www.rabbitmq.com/uri-spec.html
     #
     # URL: amqp://userName:password@hostName:portNumber/virtualHost
-    # Is the virtual host is "/", set has "%2F"
+    # If the virtual host is "/", set has "%2F"
     url: 'amqp://guest:guest@localhost:5672/%2F'
 
 # Addon command configuration
@@ -65,30 +65,3 @@ Command:
   Permission: 'uclansync.use'
   Aliases:
     - 'clansync'
-
-# Needed libraries for some systems in UClanSync
-Libraries:
-  # Redis library
-  Redis:
-    # Class to check if library is present in class path
-    # Set to "false" if you want to download the library anyway
-    check: 'redis.clients.jedis.JedisPubSub'
-    # Library dependency path (just like Gradle)
-    path: 'redis.clients:jedis:4.2.0'
-    # Required libraries to work
-    require:
-      - check: 'com.google.gson.Gson'
-        path: 'com.google.gson:gson:2.8.9'
-      - check: 'org.apache.commons.pool2.ObjectPool'
-        path: 'org.apache.commons:commons-pool2:2.11.1'
-      - check: 'org.json.JSONObject'
-        path: 'org.json:json:20211205'
-      - check: 'org.slf4j.Logger'
-        path: 'org.slf4j:slf4j-api:1.7.32'
-  # RabbitMQ library
-  RabbitMQ:
-    check: 'com.rabbitmq.client.DeliverCallback'
-    path: 'com.rabbitmq:amqp-client:5.14.2'
-    require:
-      - check: 'org.slf4j.Logger'
-        path: 'org.slf4j:slf4j-api:1.7.32'

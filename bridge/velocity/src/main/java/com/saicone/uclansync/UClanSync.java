@@ -1,6 +1,7 @@
 package com.saicone.uclansync;
 
 import com.google.inject.Inject;
+import com.saicone.ezlib.Ezlib;
 import com.saicone.uclansync.module.MainCommand;
 import com.saicone.uclansync.module.Settings;
 import com.saicone.uclansync.module.VelocityListener;
@@ -12,9 +13,12 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Plugin(id = "UClanSync", name = "Ultimate Clans Sync", version = "${version}", authors = "Rubenicos")
 public class UClanSync {
@@ -30,6 +34,7 @@ public class UClanSync {
         return settings;
     }
 
+    private Ezlib ezlib;
     private final ProxyServer proxy;
     private final Logger logger;
     private final Path dataDirectory;
@@ -40,6 +45,10 @@ public class UClanSync {
     @Inject
     public UClanSync(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         instance = this;
+        Map<String, String> relocations = new HashMap<>();
+        relocations.put(new StringBuilder("com").append(".osiris.dyml").toString(), "com.saicone.uclansync.lib.dyml");
+        ezlib = new Ezlib(new File(dataDirectory.toFile(), "libs"));
+        ezlib.load("com.github.Osiris-Team:Dyml:9.4.0", "https://jitpack.io", relocations, true);
         settings = new Settings(dataDirectory.toFile(), "settings.yml", "${version}", true);
         this.proxy = server;
         this.logger = logger;

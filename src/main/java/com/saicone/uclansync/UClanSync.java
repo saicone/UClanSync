@@ -2,25 +2,18 @@ package com.saicone.uclansync;
 
 import com.saicone.uclansync.core.ClanUpdater;
 import com.saicone.uclansync.core.messenger.Messenger;
+import com.saicone.uclansync.core.messenger.type.RabbitMQMessenger;
+import com.saicone.uclansync.core.messenger.type.RedisMessenger;
 import com.saicone.uclansync.module.Locale;
 import com.saicone.uclansync.module.SettingsFile;
 import com.saicone.uclansync.module.command.CommandLoader;
-import com.saicone.uclansync.module.library.LibraryLoader;
+import com.saicone.uclansync.module.LibraryLoader;
 import com.saicone.uclansync.module.listener.BukkitListener;
 import com.saicone.uclansync.util.Proxy;
 import me.ulrich.clans.Clans;
 import me.ulrich.clans.data.Addon;
 import me.ulrich.clans.data.ClanEnum;
 import org.bukkit.Bukkit;
-
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UClanSync extends Addon {
 
@@ -51,19 +44,17 @@ public class UClanSync extends Addon {
         SETTINGS.load(this).onReload();
         Locale.INSTANCE.load(this);
         if (isEnabled()) {
-            libraryLoader = new LibraryLoader(
-                    new File(getAddonDataFolder(), "libs"),
-                    getMessengers("rabbitmq", "redis"),
-                    getClassLoader());
-            if (libraryLoader.load(SETTINGS.getConfigurationSection("Libraries.Redis"))) {
-                libraryLoader.init("com.saicone.uclansync.core.messenger.type.RedisMessenger");
-            } else {
-                Locale.log(2, "Redis messenger will not be loaded");
+            libraryLoader = new LibraryLoader();
+            libraryLoader.load();
+            try {
+                Messenger.PROVIDERS.put("redis", RedisMessenger.class);
+            } catch (Throwable t) {
+                Messenger.PROVIDERS.remove("redis");
             }
-            if (libraryLoader.load(SETTINGS.getConfigurationSection("Libraries.RabbitMQ"))) {
-                libraryLoader.init("com.saicone.uclansync.core.messenger.type.RabbitMQMessenger");
-            } else {
-                Locale.log(2, "RabbitMQ messenger will not be loaded");
+            try {
+                Messenger.PROVIDERS.put("rabbitmq", RabbitMQMessenger.class);
+            } catch (Throwable t) {
+                Messenger.PROVIDERS.remove("rabbitmq");
             }
         } else {
             return;
@@ -105,9 +96,6 @@ public class UClanSync extends Addon {
         if (clanUpdater != null) {
             clanUpdater.onDisable();
         }
-        if (libraryLoader != null) {
-            libraryLoader.close();
-        }
     }
 
     public void onReload() {
@@ -121,46 +109,5 @@ public class UClanSync extends Addon {
 
     public ClanUpdater getClanUpdater() {
         return clanUpdater;
-    }
-
-    private URL[] getMessengers(String... names) {
-        List<URL> urls = new ArrayList<>();
-        for (String name : names) {
-            URL url = getMessenger(name);
-            if (url != null) {
-                urls.add(url);
-            }
-        }
-        return urls.toArray(new URL[0]);
-    }
-
-    private URL getMessenger(String name) {
-        URL url = getClassLoader().getResource(name + "-messenger.compiled");
-        if (url == null) {
-            Bukkit.getConsoleSender().sendMessage("[UClanSync] The " + name + " addon was not found inside .jar");
-            return null;
-        }
-
-        Path path;
-        try {
-            path = Files.createTempFile("uclansync-" + name + "-messenger", ".jar.tmp");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        path.toFile().deleteOnExit();
-
-        try (InputStream in = url.openStream()) {
-            Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        try {
-            return path.toUri().toURL();
-        } catch (Exception e) {
-            return null;
-        }
     }
 }

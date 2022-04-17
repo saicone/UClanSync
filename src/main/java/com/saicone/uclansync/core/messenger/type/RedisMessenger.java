@@ -12,10 +12,6 @@ import java.util.function.Consumer;
 
 public class RedisMessenger extends Messenger {
 
-    static {
-        Messenger.PROVIDERS.put("redis", RedisMessenger.class);
-    }
-
     private final Bridge bridge;
     private JedisPool pool = null;
     private boolean enabled = false;
