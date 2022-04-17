@@ -21,7 +21,7 @@ public class PlayerUpdateTask {
     public String getPlayersAsJson() {
         // No need to use JsonObject class, just simple formatting with StringBuilder
         StringBuilder builder = new StringBuilder();
-        connected.forEach((player, uuid) -> builder.append(", \"").append(player).append("\": \"").append(uuid).append("\""));
+        new HashMap<>(connected).forEach((player, uuid) -> builder.append(", \"").append(player).append("\": \"").append(uuid).append("\""));
         return "{" + (builder.length() > 0 ? builder.substring(2) : "") + "}";
     }
 
