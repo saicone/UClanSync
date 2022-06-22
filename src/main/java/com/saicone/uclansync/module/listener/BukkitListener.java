@@ -78,11 +78,9 @@ public class BukkitListener implements Listener {
                 new UpdateExecutor<ClanLeaderChangeEvent>(ClanLeaderChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanModDescEvent>(ClanModDescEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanModTagEvent>(ClanModTagEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanPlayerJoinEvent>(ClanPlayerJoinEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanPlayerKDRChangeEvent>(ClanPlayerKDRChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanPlayerLeaveEvent>(ClanPlayerLeaveEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanPlayerRoleChangeEvent>(ClanPlayerRoleChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanPointChangeEvent>(ClanPointChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
                 new UpdateExecutor<ClanRivalAddEvent>(ClanRivalAddEvent.getHandlerList(), (event) -> event.getClan2().toString()),
                 new UpdateExecutor<ClanRivalRemoveEvent>(ClanRivalRemoveEvent.getHandlerList(), (event) -> event.getClan2().toString()),
                 new UpdateExecutor<ClanSettingsChangeEvent>(ClanSettingsChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
@@ -122,6 +120,11 @@ public class BukkitListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onPlayerJoin(ClanPlayerJoinEvent e) {
+        UClanSync.get().getClanUpdater().updateClan(e.getClanID().toString(), true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onTeleport(ClanPlayerTeleportEvent e) {
         if (UClanSync.SETTINGS.getBoolean("Addon.Feature.Homes", true)) {
             Player player = Bukkit.getPlayer(e.getPlayerUUID());
@@ -130,6 +133,11 @@ public class BukkitListener implements Listener {
                 UClanSync.get().getClanUpdater().teleport(e.getPlayerUUID().toString(), e.getServer(), e.getLocationEncoded());
             }
         }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPointChange(ClanPointChangeEvent e) {
+        UClanSync.get().getClanUpdater().updatePoints(e.getClanID().toString(), e.getBalance());
     }
 
     @EventHandler(ignoreCancelled = true)

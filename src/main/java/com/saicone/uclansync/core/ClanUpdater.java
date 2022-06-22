@@ -72,8 +72,12 @@ public class ClanUpdater {
         updateClan(id, false);
     }
 
-    public void updateClan(String id, boolean newClan) {
-        sendMessage("UPDATECLAN", id, String.valueOf(newClan));
+    public void updateClan(String id, boolean inverse) {
+        sendMessage("UPDATECLAN", id, String.valueOf(inverse));
+    }
+
+    public void updatePoints(String clan, int points) {
+        sendMessage("UPDATEPOINTS", clan, String.valueOf(points));
     }
 
     public void updateChest(String clan) {
@@ -139,7 +143,13 @@ public class ClanUpdater {
                 return;
             }
         }
-        process(id, args);
+        try {
+            process(id, args);
+        } catch (Throwable t) {
+            if (Locale.logLevel() >= 1) {
+                throw new RuntimeException("Can't process '" + id + "' action with data: " + String.join(" ", args), t);
+            }
+        }
     }
 
     private void process(String id, String[] args) {
@@ -152,6 +162,9 @@ public class ClanUpdater {
                 return;
             case "UPDATECLAN":
                 processUpdateClan(UUID.fromString(args[0]), args[1].equalsIgnoreCase("true"));
+                return;
+            case "UPDATEPOINTS":
+                processUpdatePoints(UUID.fromString(args[0]), Integer.parseInt(args[1]));
                 return;
             case "UPDATECHEST":
                 processUpdateChest(UUID.fromString(args[0]));
@@ -206,15 +219,15 @@ public class ClanUpdater {
         }
     }
 
-    private void processUpdateClan(UUID clanID, boolean newClan) {
+    private void processUpdateClan(UUID clanID, boolean inverse) {
         if (toUpdate.contains(clanID)) {
             return;
         }
         toUpdate.add(clanID);
         Bukkit.getScheduler().runTaskLaterAsynchronously(UClanSync.getClans(), () -> {
             toUpdate.remove(clanID);
-            // Avoid bugs about clan creation
-            if (newClan) {
+            // Avoid bugs using a inverse update
+            if (inverse) {
                 UClanSync.getClans().getClanAPI().reloadClanData(clanID);
                 processUpdateMembers(clanID);
             } else {
@@ -228,6 +241,14 @@ public class ClanUpdater {
         if (UClanSync.getClans().getClanAPI().clanExists(clanID)) {
             ClanData clan = UClanSync.getClans().getClanAPI().getClan(clanID);
             clan.getMembers().iterator().forEachRemaining((player) -> UClanSync.getClans().getPlayerAPI().loadPlayerData(player));
+        }
+    }
+
+    private void processUpdatePoints(UUID clanID, int points) {
+        if (UClanSync.getClans().getClanAPI().clanExists(clanID)) {
+            UClanSync.getClans().getClanAPI().getClan(clanID).getQuest().setPoints(points < 1 ? 0 : points);
+        } else {
+            processUpdateClan(clanID, true);
         }
     }
 

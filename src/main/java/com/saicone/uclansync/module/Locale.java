@@ -13,7 +13,7 @@ public class Locale {
     public static final Locale INSTANCE = new Locale();
 
     public static void log(int level, String... msg) {
-        if (level > 0 && INSTANCE.getLogLevel() >= level) {
+        if (level > 0 && logLevel() >= level) {
             switch (level) {
                 case 1:
                     Bukkit.getConsoleSender().sendMessage(Strings.concatColor("&4[UClanSync] ", msg));
@@ -25,6 +25,10 @@ public class Locale {
                     Bukkit.getConsoleSender().sendMessage(Strings.concatColor("[UClanSync] ", msg));
             }
         }
+    }
+
+    public static int logLevel() {
+        return INSTANCE.getLogLevel();
     }
 
     public static void sendTo(CommandSender sender, String path, Object... args) {
