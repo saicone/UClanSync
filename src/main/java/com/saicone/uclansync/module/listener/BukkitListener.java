@@ -15,7 +15,6 @@ import me.ulrich.clans.events.ClanCreateEvent;
 import me.ulrich.clans.events.ClanDeleteEvent;
 import me.ulrich.clans.events.ClanExtraChestEvent;
 import me.ulrich.clans.events.ClanFFChangeEvent;
-import me.ulrich.clans.events.ClanGlobalEvent;
 import me.ulrich.clans.events.ClanGlobalFriendlyFire;
 import me.ulrich.clans.events.ClanHomeCreateEvent;
 import me.ulrich.clans.events.ClanHomeDeleteEvent;
@@ -41,10 +40,6 @@ import me.ulrich.clans.events.ClanVerifyChangeEvent;
 import me.ulrich.clans.events.ClanWarEndEvent;
 import me.ulrich.clans.events.ClanWarStartEvent;
 import me.ulrich.clans.events.ClanWarWinEvent;
-import me.ulrich.clans.events.PlayerHologramEvent;
-import me.ulrich.clans.events.PlayerHologramHideEvent;
-import me.ulrich.clans.events.PlayerHologramShowEvent;
-import me.ulrich.clans.events.StructurePaintEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -54,37 +49,57 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.RegisteredListener;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.function.Function;
 
 public class BukkitListener implements Listener {
 
     private void registerUpdater(UpdateExecutor<?>... executors) {
         for (UpdateExecutor<?> executor : executors) {
-            executor.register(this);
+            if (executor != null) {
+                executor.register(this);
+            }
+        }
+    }
+
+    private <T extends Event> UpdateExecutor<T> executor(Class<T> clazz, Function<T, String> function) {
+        return executor(clazz, function, false);
+    }
+
+    private <T extends Event> UpdateExecutor<T> executor(Class<T> clazz, Function<T, String> function, boolean inverse) {
+        try {
+            Method getHandlerList = clazz.getDeclaredMethod("getHandlerList");
+            return new UpdateExecutor<T>((HandlerList) getHandlerList.invoke(null), function, inverse);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
     public void onEnable() {
         UClanSync.getClans().getServer().getPluginManager().registerEvents(this, UClanSync.getClans());
         registerUpdater(
-                new UpdateExecutor<ClanAllyAddEvent>(ClanAllyAddEvent.getHandlerList(), (event) -> event.getClan2().toString()),
-                new UpdateExecutor<ClanAllyRemoveEvent>(ClanAllyRemoveEvent.getHandlerList(), (event) -> event.getClan2().toString()),
-                new UpdateExecutor<ClanBankChangeEvent>(ClanBankChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanBannerChangeEvent>(ClanBannerChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanDeleteEvent>(ClanDeleteEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanHomeCreateEvent>(ClanHomeCreateEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanHomeDeleteEvent>(ClanHomeDeleteEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanKDRChangeEvent>(ClanKDRChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanLeaderChangeEvent>(ClanLeaderChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanModDescEvent>(ClanModDescEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanModTagEvent>(ClanModTagEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanPlayerKDRChangeEvent>(ClanPlayerKDRChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanPlayerLeaveEvent>(ClanPlayerLeaveEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanPlayerRoleChangeEvent>(ClanPlayerRoleChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanRivalAddEvent>(ClanRivalAddEvent.getHandlerList(), (event) -> event.getClan2().toString()),
-                new UpdateExecutor<ClanRivalRemoveEvent>(ClanRivalRemoveEvent.getHandlerList(), (event) -> event.getClan2().toString()),
-                new UpdateExecutor<ClanSettingsChangeEvent>(ClanSettingsChangeEvent.getHandlerList(), (event) -> event.getClanID().toString()),
-                new UpdateExecutor<ClanVerifyChangeEvent>(ClanVerifyChangeEvent.getHandlerList(), (event) -> event.getClanID().toString())
+                executor(ClanAllyAddEvent.class, (event) -> event.getClan2().toString()),
+                executor(ClanAllyRemoveEvent.class, (event) -> event.getClan2().toString()),
+                executor(ClanBankChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanBannerChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanCreateEvent.class, (event) -> event.getClanID().toString(), true),
+                executor(ClanDeleteEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanHomeCreateEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanHomeDeleteEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanKDRChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanLeaderChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanModDescEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanModTagEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanPlayerJoinEvent.class, (event) -> event.getClanID().toString(), true),
+                executor(ClanPlayerKDRChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanPlayerLeaveEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanPlayerRoleChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanRivalAddEvent.class, (event) -> event.getClan2().toString()),
+                executor(ClanRivalRemoveEvent.class, (event) -> event.getClan2().toString()),
+                executor(ClanSettingsChangeEvent.class, (event) -> event.getClanID().toString()),
+                executor(ClanVerifyChangeEvent.class, (event) -> event.getClanID().toString())
         );
     }
 
@@ -110,18 +125,8 @@ public class BukkitListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onClanCreate(ClanCreateEvent e) {
-        UClanSync.get().getClanUpdater().updateClan(e.getClanID().toString(), true);
-    }
-
-    @EventHandler(ignoreCancelled = true)
     public void onPlayerInvited(ClanPlayerInvitedEvent e) {
         UClanSync.get().getClanUpdater().invitePlayer(e.getPlayer().toString(), e.getClanID().toString(), e.getExpires());
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerJoin(ClanPlayerJoinEvent e) {
-        UClanSync.get().getClanUpdater().updateClan(e.getClanID().toString(), true);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -159,10 +164,12 @@ public class BukkitListener implements Listener {
 
         private final HandlerList handlerList;
         private final Function<T, String> function;
+        private final boolean inverse;
 
-        public UpdateExecutor(HandlerList handlerList, Function<T, String> function) {
+        public UpdateExecutor(HandlerList handlerList, Function<T, String> function, boolean inverse) {
             this.handlerList = handlerList;
             this.function = function;
+            this.inverse = inverse;
         }
 
         public void register(Listener listener) {
@@ -173,7 +180,7 @@ public class BukkitListener implements Listener {
         @Override
         public void execute(@NotNull Listener listener, @NotNull Event event) {
             try {
-                UClanSync.get().getClanUpdater().updateClan(function.apply((T) event));
+                UClanSync.get().getClanUpdater().updateClan(function.apply((T) event), inverse);
             } catch (ClassCastException ignored) { }
         }
     }
