@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 allprojects {
@@ -7,10 +7,9 @@ allprojects {
     apply plugin: 'maven-publish'
 
     repositories {
-        maven {
-            url 'http://ptms.ink:8081/repository/releases/'
-            allowInsecureProtocol true
-        }
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url 'https://oss.sonatype.org/content/repositories/central' }
         maven { url 'https://jitpack.io' }
         mavenCentral()
     }
@@ -20,8 +19,12 @@ allprojects {
     }
 
     compileJava {
-        options.release = 8
         options.encoding = 'UTF-8'
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
@@ -32,10 +35,9 @@ processResources {
 }
 
 dependencies {
-    compileOnly 'ink.ptms.core:v11802:11802:universal'
-    compileOnly 'ink.ptms.core:v11701:11701:universal'
+    compileOnly 'org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT'
 
-    implementation 'com.saicone.ezlib:ezlib:1.1'
+    implementation 'com.saicone.ezlib:loader:1.2.3'
 
     compileOnly ('redis.clients:jedis:4.2.0') {
         exclude group: 'com.google.code.gson', module: 'gson'
@@ -57,9 +59,7 @@ jar {
 shadowJar {
     archiveClassifier.set('')
     relocate 'com.saicone.ezlib', project.group + '.lib.ezlib'
-    relocate 'com.google.gson', project.group + '.lib.gson'
     relocate 'org.apache.commons.pool2', project.group + '.lib.pool2'
-    relocate 'org.json', project.group + '.lib.json'
     relocate 'org.slf4j', project.group + '.lib.slf4j'
     relocate 'redis.clients.jedis', project.group + '.lib.jedis'
     relocate 'com.rabbitmq', project.group + '.lib.rabbitmq'
