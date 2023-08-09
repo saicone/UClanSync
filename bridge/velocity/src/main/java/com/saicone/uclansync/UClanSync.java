@@ -48,7 +48,7 @@ public class UClanSync {
         Map<String, String> relocations = new HashMap<>();
         relocations.put(new StringBuilder("com").append(".osiris.dyml").toString(), "com.saicone.uclansync.lib.dyml");
         ezlib = new Ezlib(new File(dataDirectory.toFile(), "libs"));
-        ezlib.load("com.github.Osiris-Team:Dyml:9.4.0", "https://jitpack.io", relocations, true);
+        ezlib.dependency("com.github.Osiris-Team:Dyml:9.4.0", "https://jitpack.io").relocations(relocations).parent(true).load();
         settings = new Settings(dataDirectory.toFile(), "settings.yml", "${version}", true);
         this.proxy = server;
         this.logger = logger;

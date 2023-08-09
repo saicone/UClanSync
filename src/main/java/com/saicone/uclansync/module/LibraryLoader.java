@@ -46,7 +46,7 @@ public class LibraryLoader {
 
     public void load() {
         for (String dependency : dependencies) {
-            ezlib.load(dependency, relocations, true);
+            ezlib.dependency(dependency).relocations(relocations).parent(true).load();
         }
     }
 }
